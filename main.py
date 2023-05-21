@@ -1,4 +1,4 @@
-import csv, os
+import csv
 
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
@@ -41,20 +41,19 @@ class CarProductScrapper:
     def get_product_title(self):
         elements = self.driver.find_elements(By.XPATH, "//div[@class='vehicle-card_detailsSection__o1SvU']/span/p")
         for content_title in elements:
-            if content_title in self.car_title:
+            if content_title.text in self.car_title:
                 continue
             self.car_title.append(content_title.text)
-        return(self.car_title)
+        return self.car_title
     
 
     def get_product_price(self):
-        self.price = self.driver.find_elements(By.XPATH, "//div[@class='vehicle-card_priceSection__knSHH']//h2")
-        for content_price in self.price:
-            if content_price in self.car_price:
+        elements = self.driver.find_elements(By.XPATH, "//div[@class='vehicle-card_priceSection__knSHH']//h2")
+        for content_price in elements:
+            if content_price.text in self.car_price:
                 continue
-            content_price = "".join([element.text for element in self.price])
-            self.car_price.append(content_price)
-        return(content_price)
+            self.car_price.append(content_price.text)
+        return self.car_price
     
     def get_product_link(self):
         self.link = self.driver.find_elements(By.XPATH, "//section[@class='vehicle-card_vehicleCardContainer___2DV3']/a")
@@ -62,23 +61,24 @@ class CarProductScrapper:
             if x in self.car_link:
                 continue
             self.car_link.append(x.get_attribute('href'))
-        return(self.car_link)
-
         time.sleep(5)
         self.driver.close()
+        return self.car_link
+
     
     def product_file(self, car_title, car_price, car_link):
         filename = 'products.csv'
-        file = open(filename, "w", newline='')
-        reader = csv.writer(file, delimiter='\t')
-        reader.writerow(['Car Name', 'Car Price', 'Car Link'])
-        reader.writerows(zip([car_title, car_price, car_link]))
-        file.close()
+        with open(filename, "w", newline='') as file:
+            file = open(filename, "w")
+            writer = csv.writer(file, delimiter='\t')
+            writer.writerow(['Car Name', 'Car Price', 'Car Link'])
+            writer.writerows(zip([car_title, car_price, car_link]))
+            file.close()
 
-        message = f">> Information about the car product is stored in {filename}\n"
-        print(message)
+            message = f">> Information about the car product is stored in {filename}\n"
+            print(message)
 
-        os.startfile(filename)
+
 
 
 
@@ -88,7 +88,6 @@ if __name__ == '__main__':
     product_title = car.get_product_title()
     product_price = car.get_product_price()
     product_link = car.get_product_link()
-    print(type(product_price))
     car.product_file(product_title, product_price, product_link)
 
 
