@@ -66,12 +66,12 @@ def write_car_data_to_csv(file_name, car_data):
 
 if __name__ == '__main__':
     # `browser_type` and `service_path` vary depending on your setup.
-    car = CarProductScrapper(service_path=Path.cwd(), browser_type=BrowserType.FIREFOX)
-    car.open_browser()
-    product_titles = car.get_product_title()
-    product_prices = car.get_product_price()
-    product_links = car.get_product_link()
-    car.close_browser()
+    car_scrapper = CarProductScrapper(service_path=Path.cwd(), browser_type=BrowserType.FIREFOX)
+    car_scrapper.open_browser()
+    product_titles = car_scrapper.get_product_title()
+    product_prices = car_scrapper.get_product_price()
+    product_links = car_scrapper.get_product_link()
+    car_scrapper.close_browser()
 
     zipped_data = zip(product_titles, product_prices, product_links)
     write_car_data_to_csv("products.csv", zipped_data)
