@@ -1,4 +1,6 @@
 import csv
+from enum import StrEnum, auto
+from pathlib import Path
 
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -6,15 +8,37 @@ from selenium.webdriver.chrome.service import Service
 import time
 
 
+class BrowserType(StrEnum):
+    CHROME = auto()
+    FIREFOX = auto()
+    EDGE = auto()
+    SAFARI = auto()
+
+
 class CarProductScrapper:
-    def __init__(self):
+
+    # Class variables are available to the whole class.
+    # Class variables beginning with an `_` are private by convention.
+    _browser_to_driver_mapper = {
+        BrowserType.CHROME: webdriver.Chrome,
+        BrowserType.EDGE: webdriver.Edge,
+        BrowserType.SAFARI: webdriver.Safari,
+        BrowserType.FIREFOX: webdriver.Firefox,
+    }
+
+    def __init__(self, service_path: Path, browser_type: BrowserType):
+        self.service = Service(str(service_path))
+        # The following line is a little complicated, so I'm going to go through it,
+        # we have defined `_browser_to_driver_mapper` above which maps the different
+        # types of browsers to the required webdriver. We get the driver from the
+        # dictionary and call it with `self._service`.
+        self.driver = self._browser_to_driver_mapper[browser_type](service=self.service)
+
         self.car_title = []
         self.car_price = []
         self.car_link = []
 
     def open_browser(self):
-        self.service_obj = Service("C:\Program Files (x86)\chromedriver.exe")
-        self.driver = webdriver.Chrome(service=self.service_obj)
         self.driver.maximize_window()
         self.driver.get('https://my.caredge.com/buy?inventoryType=used&priceRange=-16001&sortBy=dist&sortOrder=asc&start=0')
         time.sleep(10)
@@ -59,7 +83,8 @@ class CarProductScrapper:
 
 
 if __name__ == '__main__':
-    car = CarProductScrapper()
+    # `browser_type` and `service_path` vary depending on your setup.
+    car = CarProductScrapper(service_path=Path.cwd(), browser_type=BrowserType.FIREFOX)
     car.open_browser()
     product_title = car.get_product_title()
     product_price = car.get_product_price()
