@@ -1,5 +1,4 @@
 import csv
-from enum import StrEnum, auto
 from pathlib import Path
 
 from selenium import webdriver
@@ -8,31 +7,10 @@ from selenium.webdriver.chrome.service import Service
 import time
 
 
-class BrowserType(StrEnum):
-    CHROME = auto()
-    FIREFOX = auto()
-    EDGE = auto()
-    SAFARI = auto()
-
-
 class CarProductScrapper:
 
-    # Class variables are available to the whole class.
-    # Class variables beginning with an `_` are private by convention.
-    _browser_to_driver_mapper = {
-        BrowserType.CHROME: webdriver.Chrome,
-        BrowserType.EDGE: webdriver.Edge,
-        BrowserType.SAFARI: webdriver.Safari,
-        BrowserType.FIREFOX: webdriver.Firefox,
-    }
-
-    def __init__(self, service_path: Path, browser_type: BrowserType):
-        self.service = Service(str(service_path))
-        # The following line is a little complicated, so I'm going to go through it,
-        # we have defined `_browser_to_driver_mapper` above which maps the different
-        # types of browsers to the required webdriver. We get the driver from the
-        # dictionary and call it with `self._service`.
-        self.driver = self._browser_to_driver_mapper[browser_type](service=self.service)
+    def __init__(self, driver):
+        self.driver = driver
 
     def open_browser(self):
         self.driver.maximize_window()
@@ -65,8 +43,14 @@ def write_car_data_to_csv(file_name, car_data):
 
 
 if __name__ == '__main__':
-    # `browser_type` and `service_path` vary depending on your setup.
-    car_scrapper = CarProductScrapper(service_path=Path.cwd(), browser_type=BrowserType.FIREFOX)
+    # I have my driver in the current working directory i.e. `Path.cwd()` this
+    # will probably be different for you
+    service = Service(str(Path.cwd()))
+
+    # I'm using firefox, change this to the correct driver
+    browser_driver = webdriver.Firefox(service=service)
+
+    car_scrapper = CarProductScrapper(driver=browser_driver)
     car_scrapper.open_browser()
     product_titles = car_scrapper.get_product_title()
     product_prices = car_scrapper.get_product_price()
